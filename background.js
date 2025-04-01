@@ -41,6 +41,18 @@ function getAuthToken(callback) {
   });
 }
 
+function fetchDriveFiles() {
+  getAuthToken(function (token) {
+    fetch("https://www.googleapis.com/drive/v3/files", {
+      headers: {
+        Authorization: "Bearer " + token,
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => console.log(data));
+  });
+}
+
 // Google Drive 업로드 (JSONL 형식으로)
 function uploadToDrive(jsonData) {
   getAuthToken((token) => {
