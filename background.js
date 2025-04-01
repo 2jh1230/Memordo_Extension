@@ -41,15 +41,18 @@ function getAuthToken(callback) {
   });
 }
 
-// Google Drive 업로드
+// Google Drive 업로드 (JSONL 형식으로)
 function uploadToDrive(jsonData) {
   getAuthToken((token) => {
     const metadata = {
-      name: `visited_urls_${new Date().toISOString().split('T')[0]}.json`,
-      mimeType: 'application/json'
+      name: `visited_urls_${new Date().toISOString().split('T')[0]}.jsonl`,
+      mimeType: 'application/jsonl'
     };
 
-    const file = new Blob([JSON.stringify(jsonData, null, 2)], { type: 'application/json' });
+    // JSONL 형식으로 변환
+    const jsonl = jsonData.map(entry => JSON.stringify(entry)).join('\n');
+    const file = new Blob([jsonl], { type: 'application/jsonl' });
+
     const form = new FormData();
     form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
     form.append('file', file);
