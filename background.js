@@ -24,7 +24,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
         url: tab.url,
         timestamp: new Date().toISOString()
       });
-      chrome.storage.sync.set({ visitedUrls: visited });
+      chrome.storage.local.set({ visitedUrls: visited });
       console.log('[memordo] URL 저장됨:', tab.url);
     }
   });
