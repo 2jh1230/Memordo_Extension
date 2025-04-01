@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 document.getElementById('upload-button').addEventListener('click', () => {
-  chrome.storage.sync.get(['visitedUrls'], (data) => {
+  chrome.storage.local.get(['visitedUrls'], (data) => {
     const urls = data.visitedUrls || [];
     chrome.runtime.sendMessage({ action: 'uploadToDrive', data: urls });
   });
