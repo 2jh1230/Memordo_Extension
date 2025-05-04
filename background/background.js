@@ -9,8 +9,13 @@ chrome.runtime.onInstalled.addListener(() => {
 });
 
 // 탭 변경 시 실행
+// background/background.js
+
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-  if (changeInfo.status !== 'complete' || !tab.url.startsWith('http')) return;
+  // 페이지 로딩이 완료되고, 유효한 URL이며, 제목이 있을 때만 처리
+  if (changeInfo.status !== 'complete' || !tab.url || !tab.url.startsWith('http') || !tab.title) {
+    return;
+  }
 
   chrome.storage.sync.get(['trackingEnabled'], (syncData) => {
     if (!syncData.trackingEnabled) return;
@@ -18,17 +23,19 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     chrome.storage.local.get(['visitedUrls'], (localData) => {
       const visited = localData.visitedUrls || [];
 
-      // URL 중복 확인 (기본은 전체 URL 기준)
+      // URL 중복 확인 (기존과 동일)
       const alreadyVisited = visited.some(entry => entry.url === tab.url);
       if (!alreadyVisited) {
+        // title 추가
         visited.push({
           url: tab.url,
+          title: tab.title, // 페이지 제목 저장
           timestamp: new Date().toISOString()
         });
 
         // local에 저장
         chrome.storage.local.set({ visitedUrls: visited }, () => {
-          console.log('[memordo] URL 저장됨:', tab.url);
+          console.log('[memordo] URL 및 제목 저장됨:', tab.url, tab.title); // 로그 수정
         });
       }
     });

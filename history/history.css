@@ -1,3 +1,5 @@
+/* history/history.css */
+
 /* 기본 스타일 및 폰트 설정 */
 body {
   font-family: 'Noto Sans KR', sans-serif;
@@ -38,38 +40,56 @@ ul {
   margin: 0;
 }
 
+/* === 수정된 부분 시작 === */
 li {
   padding: 10px 8px; /* 아이템 패딩 조정 */
   border-radius: 4px;
   transition: background-color 0.2s ease;
-  display: flex; /* 자식 요소(링크, 타임스탬프) 가로 배치 */
-  justify-content: space-between; /* 자식 요소 양쪽 끝으로 정렬 */
-  align-items: center; /* 자식 요소 수직 중앙 정렬 */
-  line-height: 1.6; /* 줄 간격 조정 */
-  /* word-break: break-all; 제거 -> 줄바꿈 방지 위해 */
+  display: flex; /* Flexbox 유지 */
+  /* justify-content: space-between; 제거 -> 요소들이 순서대로 배치되도록 함 */
+  align-items: flex-start; /* 아이템들을 위쪽 기준으로 정렬 (여러 줄일 때 대비) */
+  flex-wrap: wrap; /* 내용이 길 경우 줄바꿈 허용 */
+  line-height: 1.5; /* 줄 간격 조정 */
+  margin-bottom: 8px; /* 아이템 간격 */
+  position: relative; /* 타임스탬프 절대 위치 기준 */
+  min-height: 3.5em; /* 최소 높이 확보 (제목+URL) */
 }
 
 li:not(:last-child) {
-    margin-bottom: 5px; /* 아이템 간 약간의 간격 */
+    margin-bottom: 8px; /* 아이템 간 간격 유지 */
 }
 
 li:hover {
   background-color: #e8f0fe; /* 호버 색상 조정 */
 }
 
-/* 링크 스타일 수정 */
-a {
-  color: #4285F4; /* 팝업 버튼과 유사한 링크 색상 */
-  text-decoration: none;
-  flex-grow: 1; /* 링크 영역이 가능한 많은 공간 차지 */
-  margin-right: 15px; /* 타임스탬프와의 간격 */
-
-  /* --- 한 줄 처리 및 말줄임표 추가 --- */
+/* 제목 스타일 */
+.entry-title {
+  font-weight: 500; /* 약간 굵게 */
+  color: #333; /* 기본 텍스트 색상 */
+  margin-bottom: 2px; /* 제목과 URL 사이 간격 */
+  flex-basis: calc(100% - 70px); /* 전체 너비에서 타임스탬프 너비 제외 (대략적 값) */
   white-space: nowrap;      /* 줄바꿈 방지 */
   overflow: hidden;         /* 넘치는 텍스트 숨김 */
   text-overflow: ellipsis;  /* 말줄임표(...) 표시 */
-  display: block;           /* 블록 요소로 만들어 text-overflow 안정화 */
-  /* ------------------------------------ */
+  display: block;           /* 블록 요소로 */
+  font-size: 0.9em; /* 제목 크기 */
+  line-height: 1.4;
+}
+
+/* 링크(URL) 스타일 수정 */
+a {
+  color: #0c64e8; /* URL 색상 약간 흐리게 */
+  text-decoration: none;
+  /* flex-grow 제거 */
+  /* margin-right 제거 */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+  font-size: 0.9em; /* URL 글씨 약간 작게 */
+  line-height: 1.4;
+  flex-basis: calc(100% - 70px); /* 제목과 동일하게 너비 설정 */
 }
 
 a:hover {
@@ -81,8 +101,14 @@ a:hover {
   color: #777; /* 타임스탬프 색상 조정 */
   font-size: 0.85em; /* 크기 약간 줄임 */
   white-space: nowrap; /* 타임스탬프는 줄바꿈 안 함 (유지) */
-  flex-shrink: 0; /* 타임스탬프 너비가 줄어들지 않도록 설정 */
+  position: absolute; /* 절대 위치 사용 */
+  right: 8px; /* 오른쪽 여백 */
+  top: 50%; /* 수직 중앙 정렬을 위해 */
+  transform: translateY(-50%); /* 수직 중앙 정렬 */
+  /* margin-left: auto; 제거 */
+  /* flex-shrink: 0; 제거 */
 }
+/* === 수정된 부분 끝 === */
 
 /* 방문 기록 없을 때 메시지 */
 #history-list p {
