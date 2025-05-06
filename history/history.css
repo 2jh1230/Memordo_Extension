@@ -2,117 +2,264 @@
 
 /* 기본 스타일 및 폰트 설정 */
 body {
-  font-family: 'Noto Sans KR', sans-serif;
-  font-size: 14px;
-  color: #333;
-  background-color: #f9f9f9;
-  padding: 25px; /* 전체 패딩 증가 */
-  margin: 0;
+  font-family: 'Noto Sans KR', sans-serif; /* 기본 폰트 설정 (Noto Sans KR 없으면 시스템 sans-serif) */
+  font-size: 14px;                        /* 기본 글자 크기 */
+  color: #333;                             /* 기본 글자 색상 */
+  background-color: #f9f9f9;              /* 페이지 전체 배경색 */
+  padding: 25px;                           /* 페이지 전체 내부 여백 */
+  margin: 0;                               /* body 요소의 기본 마진 제거 */
 }
 
+/* 페이지 제목 스타일 ('방문 기록') */
 h2 {
-  font-size: 20px;
-  font-weight: 600;
-  color: #222;
-  margin-top: 0;
-  margin-bottom: 25px;
-  text-align: center;
+  font-size: 20px;       /* 제목 글자 크기 */
+  font-weight: 600;      /* 제목 굵기 */
+  color: #222;          /* 제목 글자 색상 */
+  margin-top: 0;         /* 제목 위쪽 마진 제거 */
+  margin-bottom: 25px;   /* 제목 아래쪽 여백 */
+  text-align: center;    /* 제목 가운데 정렬 */
 }
 
-/* 날짜 그룹 */
+/* --- 액션 바 (삭제 버튼과 상태 메시지 포함 영역) 스타일 --- */
+.action-bar {
+  display: flex;                   /* 자식 요소(버튼, 메시지)를 가로로 배치 */
+  align-items: center;             /* 자식 요소 수직 가운데 정렬 */
+
+  /* 애니메이션 및 초기 상태 설정 (max-height 기법으로 높이 조절) */
+  max-height: 0;                   /* 초기 높이 0 (숨김 상태) */
+  opacity: 0;                      /* 초기 상태: 투명 */
+  overflow: hidden;                /* 내용 넘치면 숨김 (애니메이션 필수) */
+  margin-bottom: 0;                /* 초기 아래쪽 마진 0 */
+  padding-top: 0;                  /* 초기 위쪽 패딩 0 */
+  padding-bottom: 0;               /* 초기 아래쪽 패딩 0 */
+  border-bottom-width: 0;          /* 초기 아래쪽 테두리 두께 0 */
+  border-bottom-style: solid;      /* 테두리 스타일 유지 (애니메이션 위해) */
+  border-bottom-color: #eee;       /* 테두리 색상 유지 */
+  box-sizing: border-box;          /* 패딩/테두리 포함하여 크기 계산 */
+
+  /* 여러 속성에 대한 전환(애니메이션) 효과 설정 */
+  transition:
+    max-height 0.4s ease-in-out,   /* 높이 변경 애니메이션 */
+    opacity 0.2s ease 0.1s,        /* 투명도 애니메이션 (나타날 때 약간 늦게) */
+    margin-bottom 0.4s ease-in-out, /* 마진 변경 애니메이션 */
+    padding-top 0.4s ease-in-out,   /* 패딩 변경 애니메이션 */
+    padding-bottom 0.4s ease-in-out, /* 패딩 변경 애니메이션 */
+    border-bottom-width 0.4s ease-in-out; /* 테두리 두께 애니메이션 */
+}
+
+/* 액션 바가 보여질 때 적용될 스타일 (.visible 클래스가 추가되었을 때) */
+.action-bar.visible {
+  /* 내용물 높이 + 패딩 + 테두리보다 충분히 큰 값으로 설정 (펼쳐진 상태) */
+  max-height: 100px;               /* 예시 값, 버튼 높이 등을 고려해 조정 */
+  opacity: 1;                      /* 최종 상태: 불투명 */
+
+  /* 원래 값 복원 */
+  margin-bottom: 20px;             /* 원래 아래쪽 마진 */
+  padding-bottom: 15px;            /* 원래 아래쪽 패딩 */
+  /* padding-top: 0; */             /* 원래 위쪽 패딩이 0이었다면 생략 가능 */
+  border-bottom-width: 1px;        /* 원래 아래쪽 테두리 두께 */
+}
+
+/* 삭제 상태 메시지 스타일 (#delete-status) */
+#delete-status {
+  font-size: 13px;                 /* 메시지 글자 크기 */
+  color: #555;                     /* 메시지 글자 색상 */
+  opacity: 1;                      /* 기본 상태: 불투명 */
+  /* 메시지가 액션 바보다 약간 늦게 나타나도록 전환 효과 설정 */
+  transition: opacity 0.3s ease 0.2s;
+}
+
+/* 액션 바가 숨겨질 때(.visible 클래스가 없을 때) 상태 메시지 스타일 */
+.action-bar:not(.visible) #delete-status {
+  opacity: 0;                      /* 숨김 상태: 투명 */
+  transition-delay: 0s;            /* 사라질 때는 지연 시간 없음 */
+  transition-duration: 0.1s;       /* 빠르게 사라지도록 */
+}
+
+/* --- 파란색 애니메이션 삭제 버튼 스타일 (#delete-selected-button) --- */
+#delete-selected-button {
+  /* 버튼 스타일 및 애니메이션에 사용될 CSS 변수(커스텀 속성) 정의 */
+  --background: #275efe;             /* 버튼 배경색 */
+  --text: #fff;                       /* 버튼 글자색 */
+  --font-size: 14px;                 /* 버튼 글자 크기 */
+  --duration: .44s;                 /* 버튼 내부 글자 애니메이션 시간 */
+  --move-hover: -1px;                /* 마우스 올렸을 때 버튼 Y축 이동 거리 */
+  --shadow: 0 2px 8px -1px rgba(39, 94, 254, 0.32);  /* 기본 그림자 */
+  --shadow-hover: 0 4px 20px -2px rgba(39, 94, 254, 0.5); /* 호버 시 그림자 */
+  --font-shadow: var(--font-size);   /* 글자 아래 그림자 Y 오프셋 (입체 효과용) */
+  --m: 0;                             /* 글자 초기 Y 위치 (애니메이션용) */
+
+  /* 버튼 기본 모양 및 배치 설정 */
+  padding: 10px 20px;                /* 내부 여백 (상하 10px, 좌우 20px) */
+  font-family: 'Roboto', 'Noto Sans KR', sans-serif; /* 버튼 폰트 */
+  font-weight: 500;                  /* 폰트 굵기 */
+  line-height: var(--font-size);     /* 줄 높이 */
+  border-radius: 24px;               /* 버튼 모서리 둥글게 */
+  outline: none;                     /* 포커스 시 외곽선 제거 */
+  appearance: none;                  /* 브라우저 기본 버튼 스타일 제거 */
+  border: none;                      /* 테두리 제거 */
+  text-decoration: none;             /* 텍스트 밑줄 제거 */
+  font-size: var(--font-size);       /* 글자 크기 적용 */
+  letter-spacing: .5px;              /* 글자 간격 */
+  background: var(--background);     /* 배경색 적용 */
+  color: var(--text);                /* 글자색 적용 */
+  box-shadow: var(--shadow);         /* 그림자 적용 */
+  cursor: pointer;                   /* 마우스 커서를 손가락 모양으로 */
+  margin-right: 10px;                /* 오른쪽 여백 (상태 메시지와의 간격) */
+  display: block;                    /* 블록 요소로 표시 */
+  flex-shrink: 0;                    /* 액션 바 크기 변경 시 버튼 크기 줄어들지 않도록 */
+
+  /* 버튼 자체의 호버 애니메이션 설정 (위치 이동, 그림자 변경) */
+  transition:
+    transform var(--duration) ease,    /* transform(위치) 변경 시 애니메이션 */
+    box-shadow var(--duration) ease;   /* box-shadow(그림자) 변경 시 애니메이션 */
+  transform: translateY(0);            /* 초기 Y 위치 (호버 애니메이션 기준점) */
+}
+
+/* 버튼 내부의 div 요소 (글자 span들을 감싸는 역할) */
+#delete-selected-button div {
+  display: flex;                     /* 내부 span들을 가로로 배치 */
+  overflow: hidden;                  /* 내부 span 애니메이션 시 영역 벗어나면 숨김 */
+  /* 글자 아래에 같은 색의 그림자를 주어 입체 효과 */
+  text-shadow: 0 var(--font-shadow) 0 var(--text);
+}
+
+/* 버튼 내부의 span 요소 (JavaScript에 의해 각 글자가 span으로 감싸짐) */
+#delete-selected-button div span {
+  display: block;                    /* span을 블록 요소로 처리 */
+  backface-visibility: hidden;       /* 애니메이션 중 뒷면 숨김 (성능 개선) */
+  font-style: normal;                /* 기본 폰트 스타일 */
+  /* 글자 위치(transform) 변경 시 애니메이션 효과 */
+  transition: transform var(--duration) ease;
+  transform: translateY(var(--m)) translateZ(0); /* 초기 Y 위치 및 3D 가속 활성화 */
+}
+
+/* 각 글자(span)별 애니메이션 시작 지연 시간 설정 (순차적 효과) */
+#delete-selected-button div span:nth-child(1) { transition-delay: 0.05s; }
+#delete-selected-button div span:nth-child(2) { transition-delay: 0.1s; }
+#delete-selected-button div span:nth-child(3) { transition-delay: 0.15s; } /* '삭제'는 2글자지만 여유분 */
+#delete-selected-button div span:nth-child(4) { transition-delay: 0.2s; }
+#delete-selected-button div span:nth-child(5) { transition-delay: 0.25s; }
+#delete-selected-button div span:nth-child(6) { transition-delay: 0.3s; }
+#delete-selected-button div span:nth-child(7) { transition-delay: 0.35s; }
+#delete-selected-button div span:nth-child(8) { transition-delay: 0.4s; }
+
+/* 버튼에 마우스를 올렸을 때(:hover) 스타일 */
+#delete-selected-button:hover {
+  /* 버튼을 위로 약간 이동 (var(--move-hover) 값: -4px) */
+  transform: translateY(var(--move-hover));
+  /* 그림자 효과 변경 */
+  box-shadow: var(--shadow-hover);
+}
+
+/* 버튼에 마우스를 올렸을 때(:hover) 내부 글자(span) 스타일 */
+#delete-selected-button:hover span {
+  /* 글자 Y 위치를 위로 이동시켜 아래 그림자가 보이게 함 */
+  --m: calc(var(--font-size) * -1);
+}
+
+/* --- 나머지 스타일 (날짜 그룹, 리스트 아이템 등) --- */
+/* 날짜 그룹 스타일 */
 .date-group {
-  margin-bottom: 25px; /* 그룹 간 여백 증가 */
-  border-bottom: 1px solid #eee; /* 구분선 더 옅게 */
-  padding-bottom: 15px;
+  margin-bottom: 25px;             /* 날짜 그룹 사이의 아래쪽 여백 */
+  border-bottom: 1px solid #eee;   /* 그룹 아래 구분선 */
+  padding-bottom: 15px;            /* 구분선과 내용 사이 여백 */
 }
 
+/* 날짜 그룹 제목 (예: '2025-05-06 (화)') 스타일 */
 .date-group h3 {
-  font-size: 16px;
-  font-weight: 500;
-  margin-bottom: 15px;
-  color: #555;
+  font-size: 16px;                 /* 날짜 제목 글자 크기 */
+  font-weight: 500;                /* 날짜 제목 굵기 */
+  margin-bottom: 15px;             /* 날짜 제목 아래 여백 */
+  color: #555;                     /* 날짜 제목 글자 색상 */
 }
 
-/* 리스트 스타일 */
+/* 방문 기록 목록 전체 (ul) 스타일 */
 ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
+  list-style: none;                /* 기본 목록 마커(점) 제거 */
+  padding: 0;                      /* 내부 여백 제거 */
+  margin: 0;                       /* 외부 여백 제거 */
 }
 
-/* === 수정된 부분 시작 === */
+/* 각 방문 기록 항목 (li) 스타일 */
 li {
-  padding: 10px 8px; /* 아이템 패딩 조정 */
-  border-radius: 4px;
-  transition: background-color 0.2s ease;
-  display: flex; /* Flexbox 유지 */
-  /* justify-content: space-between; 제거 -> 요소들이 순서대로 배치되도록 함 */
-  align-items: flex-start; /* 아이템들을 위쪽 기준으로 정렬 (여러 줄일 때 대비) */
-  flex-wrap: wrap; /* 내용이 길 경우 줄바꿈 허용 */
-  line-height: 1.5; /* 줄 간격 조정 */
-  margin-bottom: 8px; /* 아이템 간격 */
-  position: relative; /* 타임스탬프 절대 위치 기준 */
-  min-height: 3.5em; /* 최소 높이 확보 (제목+URL) */
+  padding: 10px 8px;               /* 항목 내부 여백 */
+  border-radius: 4px;              /* 모서리 둥글게 */
+  transition: background-color 0.2s ease; /* 배경색 변경 시 부드러운 효과 */
+  display: flex;                   /* 자식 요소(체크박스, 내용, 시간) 가로 배치 */
+  align-items: center;             /* 자식 요소 수직 가운데 정렬 */
+  margin-bottom: 8px;              /* 항목 사이 아래쪽 여백 */
+  position: relative;              /* 타임스탬프 절대 위치의 기준점 */
+  min-height: 3.5em;               /* 항목의 최소 높이 확보 */
 }
 
-li:not(:last-child) {
-    margin-bottom: 8px; /* 아이템 간 간격 유지 */
-}
-
+/* 리스트 항목에 마우스를 올렸을 때(:hover) 배경색 변경 */
 li:hover {
-  background-color: #e8f0fe; /* 호버 색상 조정 */
+  background-color: #e8f0fe;       /* 연한 파란색 배경 */
 }
 
-/* 제목 스타일 */
+/* 리스트 항목 내부의 체크박스 스타일 */
+li input[type="checkbox"] {
+  margin-right: 12px;              /* 체크박스와 오른쪽 내용 사이 여백 */
+  flex-shrink: 0;                  /* 공간 부족 시 크기 줄어들지 않도록 */
+  cursor: pointer;                 /* 마우스 커서 손가락 모양으로 */
+  vertical-align: middle;          /* 다른 인라인 요소와 수직 정렬 */
+}
+
+/* 리스트 항목 내부의 제목과 URL을 감싸는 컨테이너 스타일 */
+.entry-content {
+  flex-grow: 1;                    /* 남는 가로 공간 모두 차지 */
+  margin-right: 75px;              /* 오른쪽 여백 (타임스탬프 공간 확보) */
+  overflow: hidden;                /* 내부 내용 넘치면 숨김 */
+  display: flex;                   /* 내부 요소(제목, URL) 배치 위해 Flexbox 사용 */
+  flex-direction: column;          /* 내부 요소를 세로로 쌓음 */
+  justify-content: center;         /* 내부 요소 수직 가운데 정렬 (선택 사항) */
+}
+
+/* 리스트 항목의 제목 스타일 */
 .entry-title {
-  font-weight: 500; /* 약간 굵게 */
-  color: #333; /* 기본 텍스트 색상 */
-  margin-bottom: 2px; /* 제목과 URL 사이 간격 */
-  flex-basis: calc(100% - 70px); /* 전체 너비에서 타임스탬프 너비 제외 (대략적 값) */
-  white-space: nowrap;      /* 줄바꿈 방지 */
-  overflow: hidden;         /* 넘치는 텍스트 숨김 */
-  text-overflow: ellipsis;  /* 말줄임표(...) 표시 */
-  display: block;           /* 블록 요소로 */
-  font-size: 0.9em; /* 제목 크기 */
-  line-height: 1.4;
+  font-weight: 500;                /* 글자 약간 굵게 */
+  color: #333;                    /* 글자 색상 */
+  margin-bottom: 2px;              /* 제목과 URL 사이 여백 */
+  display: block;                  /* 블록 요소로 처리 (줄바꿈 등) */
+  white-space: nowrap;             /* 제목 길어도 줄바꿈 안 함 */
+  overflow: hidden;                /* 영역 벗어나는 텍스트 숨김 */
+  text-overflow: ellipsis;         /* 넘치는 텍스트는 ...으로 표시 */
+  font-size: 0.9em;                /* 기본 글자보다 약간 작게 */
+  line-height: 1.4;                /* 줄 높이 */
 }
 
-/* 링크(URL) 스타일 수정 */
+/* 리스트 항목의 URL 링크(a) 스타일 */
 a {
-  color: #0c64e8; /* URL 색상 약간 흐리게 */
-  text-decoration: none;
-  /* flex-grow 제거 */
-  /* margin-right 제거 */
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: block;
-  font-size: 0.9em; /* URL 글씨 약간 작게 */
-  line-height: 1.4;
-  flex-basis: calc(100% - 70px); /* 제목과 동일하게 너비 설정 */
+  color: #0c64e8;                  /* 링크 색상 */
+  text-decoration: none;           /* 밑줄 제거 */
+  display: block;                  /* 블록 요소로 처리 */
+  white-space: nowrap;             /* URL 길어도 줄바꿈 안 함 */
+  overflow: hidden;                /* 영역 벗어나는 텍스트 숨김 */
+  text-overflow: ellipsis;         /* 넘치는 텍스트는 ...으로 표시 */
+  font-size: 0.9em;                /* 기본 글자보다 약간 작게 */
+  line-height: 1.4;                /* 줄 높이 */
 }
 
+/* URL 링크에 마우스를 올렸을 때(:hover) 밑줄 표시 */
 a:hover {
-  text-decoration: underline; /* 호버 시 밑줄 */
+  text-decoration: underline;
 }
 
-/* 타임스탬프 스타일 */
+/* 리스트 항목의 타임스탬프(방문 시간) 스타일 */
 .timestamp {
-  color: #777; /* 타임스탬프 색상 조정 */
-  font-size: 0.85em; /* 크기 약간 줄임 */
-  white-space: nowrap; /* 타임스탬프는 줄바꿈 안 함 (유지) */
-  position: absolute; /* 절대 위치 사용 */
-  right: 8px; /* 오른쪽 여백 */
-  top: 50%; /* 수직 중앙 정렬을 위해 */
-  transform: translateY(-50%); /* 수직 중앙 정렬 */
-  /* margin-left: auto; 제거 */
-  /* flex-shrink: 0; 제거 */
+  color: #777;                     /* 글자 색상 */
+  font-size: 0.85em;               /* 기본 글자보다 더 작게 */
+  white-space: nowrap;             /* 시간은 줄바꿈되지 않도록 */
+  position: absolute;              /* 부모(li) 기준 절대 위치 */
+  right: 8px;                      /* 오른쪽 끝에서 8px */
+  top: 50%;                        /* 위에서 50% 위치 */
+  transform: translateY(-50%);     /* Y축으로 -50% 이동하여 수직 중앙 정렬 */
 }
-/* === 수정된 부분 끝 === */
 
-/* 방문 기록 없을 때 메시지 */
+/* 방문 기록이 없을 때 표시되는 메시지(#history-list 내부의 p 태그) 스타일 */
 #history-list p {
-  text-align: center;
-  color: #888;
-  margin-top: 30px;
+  text-align: center;              /* 텍스트 가운데 정렬 */
+  color: #888;                     /* 글자 색상 */
+  margin-top: 30px;                /* 위쪽 여백 */
 }
